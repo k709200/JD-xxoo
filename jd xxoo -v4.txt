@@ -1,0 +1,39 @@
+from bs4 import BeautifulSoup 
+from selenium import webdriver
+import requests as req
+
+jd_dir="/home/k709200/Downloads/jd/"
+index = 'http://jandan.net/ooxx/'
+ 
+def main(urls):
+    next_gr=[]
+    driver=webdriver.Chrome('/home/k709200/Documents/chromedriver')
+    driver.maximize_window()
+    driver.get(urls)
+    data = driver.page_source
+    # print(data)
+    soup = BeautifulSoup(data,'html.parser')
+    grades = soup.find_all('a')
+    driver.close()
+    try:
+        for i in grades:
+            link_l=i.get('href')
+            if '/large/' in link_l:
+                pic_name=link_l.split('/large/')[1]
+                try:
+                    with open(jd_dir+pic_name,'xb') as pic:
+                        pic.write(req.get("http:"+link_l).content)
+                        print("http:"+link_l +' >> '+jd_dir+pic_name+ ' >>:done')
+                except:
+                    print(jd_dir+pic_name+' >>:already existing')
+            if '/ooxx/' in link_l:
+                next_gr.append(link_l)
+    except:
+        pass
+
+    return 'http:'+next_gr[-2]
+
+for i in range(120):
+    print(110-i)
+    print('processing>: '+index)
+    index=main(index)
